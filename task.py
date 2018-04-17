@@ -33,11 +33,19 @@ class Task():
         if(task_name=='Sample_Task'):
             reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
         elif(task_name=='Takeoff'):
+            reward=0
             #print('target_pos',self.target_pos)
             #print('sim_pose',self.sim.pose)
-            reward = -min(abs(self.target_pos[2] - self.sim.pose[2]), 20.0)
-            if self.sim.pose[2] >= self.target_pos[2]:
-                reward += 10.0
+            reward =reward+(1.-.1*(abs(self.sim.pose[2] - self.target_pos[2])))
+            if(abs(np.max(self.sim.v[:3]))<=1 || abs(np.max(self.sim.v[:3]))>10):
+                reward=reward-0.5  #panalty the reward if the vertical velocity diminishes
+            else:
+                reward=reward+0.1  # bonus if vertical velocity doesn't dimishes
+
+            
+                
+                
+            #print("reward", reward)
             
         elif(task_name=='Hover'):
             reward=0
