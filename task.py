@@ -30,14 +30,15 @@ class Task():
 
     def get_reward(self,task_name):
         """Uses current pose of sim to return reward."""
+        reward=0
         if(task_name=='Sample_Task'):
             reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
         elif(task_name=='Takeoff'):
-            reward=0
+            
             #print('target_pos',self.target_pos)
             #print('sim_pose',self.sim.pose)
             reward =reward+(1.-.1*(abs(self.sim.pose[2] - self.target_pos[2])))
-            if(abs(np.max(self.sim.v[:3]))<=1 || abs(np.max(self.sim.v[:3]))>10):
+            if(abs(np.max(self.sim.v[:3]))<=1 or abs(np.max(self.sim.v[:3]))>10):
                 reward=reward-0.5  #panalty the reward if the vertical velocity diminishes
             else:
                 reward=reward+0.1  # bonus if vertical velocity doesn't dimishes
@@ -48,7 +49,20 @@ class Task():
             #print("reward", reward)
             
         elif(task_name=='Hover'):
-            reward=0
+            #reward/Panalty for positional changes
+            x_i=self.sim.pose[2]
+            x_f=self.target_pos[2]
+            x_c=(x_i+x_f)/2
+            if(x_i<=0):
+                reward=reward+(-0.2)
+            elif(x_i>0 and x_i<x_c):
+                reward=reward+(1-(x_c-x_i)*0.02)
+            elif(x_i>x_c and x_i<x_f):
+                reward=reward-(1-(x_f-x_i)*0.02)
+            
+
+            
+            
         return reward
 
     def step(self, rotor_speeds,task_name):
